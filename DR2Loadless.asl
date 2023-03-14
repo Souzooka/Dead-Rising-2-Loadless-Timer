@@ -8,6 +8,7 @@ state("deadrising2")
     int KillCount: 0x09DE9A8, 0x0, 0x444;
     int PlayerLevel: 0x09CB124, 0x4, 0x98, 0x20;
     int PlayerCash: 0x09DE9A8, 0x8, 0x70;
+    byte PlayerControl: 0x97BDC0;
     float TKHealth: 0x09DC488, 0xE8, 0x12C, 0x28, 0x16C, 0x1AC;
     string255 InfoBox: 0x0A11604, 0x194, 0xFC, 0x58;
 }
@@ -168,7 +169,7 @@ init
 
 start
 {
-	return (old.RoomId == 2 && current.RoomId != 2);
+	return (old.PlayerControl == 1 && current.PlayerControl == 0);
 }
 
 reset
@@ -272,11 +273,6 @@ isLoading
   return current.IsLoading;
 }
 
-onStart
-{
-    timer.IsGameTimePaused = true;
-}
-
 onReset
 {
     vars.Splits.Clear();
@@ -285,4 +281,5 @@ onReset
 exit
 {
     timer.IsGameTimePaused = true;
+    vars.Splits.Clear();
 }
