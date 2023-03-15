@@ -1,5 +1,5 @@
 //Load Remover by Souzooka
-//Autosplitter by streetbackguy
+//Autosplitter by Streetbackguy and Sweed
 state("deadrising2")
 {
     bool IsLoading: 0x9DC3F0, 0x38, 0x1C8;
@@ -11,11 +11,12 @@ state("deadrising2")
     byte PlayerControl: 0x97BDC0;
     float BossHealth: 0x09DC488, 0xE8, 0x12C, 0x28, 0x16C, 0x1AC;
     string255 InfoBox: 0x0A11604, 0x194, 0xFC, 0x58;
+    int TIRTimer: 0x0097F2B8, 0x34, 0x1C, 0x3C8, 0x3F;
 }
 
 startup
 {    
-    settings.Add("splits", true, "Splits");
+    settings.Add("splits", true, "Dead Rising 2");
 
         //Prologue
         settings.Add("prologue", true, "Prologue", "splits");
@@ -165,11 +166,12 @@ startup
 init
 {
     vars.Splits = new HashSet<string>();
+    vars.EarlHelper = 0;
 }
 
 start
 {
-	return (old.PlayerControl == 1 && current.PlayerControl == 0);
+	return (current.Cutscene == "003_chucks_entrance" && current.TIRTimer != 66 && old.TIRTimer == 66); //Starts on TIR Timer reaching 0 in Prologue
 }
 
 reset
@@ -182,6 +184,11 @@ update
 	if (current.RoomId == 5 && old.RoomId != 5) 
     { 
         vars.Splits.Clear(); 
+    }
+
+    if (current.RoomId == 29  && current.InfoBox == "PSYCHOPATH DEFEATED BONUS!")
+    {
+        vars.EarlHelper++;
     }
 }
 
@@ -207,7 +214,7 @@ split
         return settings["derrick"];
     }
     
-    if (current.RoomId == 29  && current.InfoBox == "PSYCHOPATH DEFEATED BONUS!" && !vars.Splits.Contains("earl"))
+    if (current.RoomId == 29 && current.InfoBox == "PSYCHOPATH DEFEATED BONUS!" && vars.EarlHelper == 2 && !vars.Splits.Contains("earl"))
     {
         vars.Splits.Add("earl");
         return settings["earl"];
@@ -232,7 +239,7 @@ split
         return settings["surv"];
     }
 
-    //Zombie Genocider Master plits
+    //Zombie Genocider Master Splits
     if (current.KillCount != old.KillCount)
     {
         foreach(int count in vars.GenociderKills)
@@ -280,16 +287,18 @@ split
 
 isLoading
 {
-  return current.IsLoading;
+    return current.IsLoading;
 }
 
 onReset
 {
     vars.Splits.Clear();
+    vars.EarlHelper = 0;
 }
 
 exit
 {
     timer.IsGameTimePaused = true;
     vars.Splits.Clear();
+    vars.EarlHelper = 0;
 }
