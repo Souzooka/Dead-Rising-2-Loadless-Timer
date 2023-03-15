@@ -9,7 +9,7 @@ state("deadrising2")
     int PlayerLevel: 0x09CB124, 0x4, 0x98, 0x20;
     int PlayerCash: 0x09DE9A8, 0x8, 0x70;
     byte PlayerControl: 0x97BDC0;
-    float TKHealth: 0x09DC488, 0xE8, 0x12C, 0x28, 0x16C, 0x1AC;
+    float BossHealth: 0x09DC488, 0xE8, 0x12C, 0x28, 0x16C, 0x1AC;
     string255 InfoBox: 0x0A11604, 0x194, 0xFC, 0x58;
 }
 
@@ -75,7 +75,7 @@ startup
 
         //The Facts Splits
         settings.Add("facts", true, "The Facts", "splits");
-            settings.Add("062_sullivan_boss_death", false, "Sullivan", "facts");
+            settings.Add("sullivan", false, "Sullivan", "facts");
 
         //Overtime Splits
 		settings.Add("overtime", true, "Overtime", "splits");
@@ -200,20 +200,30 @@ split
         vars.Splits.Add("johnny");
         return settings["johnny"];
     }
+    
     if (current.RoomId == 33  && current.InfoBox == "PSYCHOPATH DEFEATED BONUS!" && !vars.Splits.Contains("derrick"))
     {
         vars.Splits.Add("derrick");
         return settings["derrick"];
     }
+    
     if (current.RoomId == 29  && current.InfoBox == "PSYCHOPATH DEFEATED BONUS!" && !vars.Splits.Contains("earl"))
     {
         vars.Splits.Add("earl");
         return settings["earl"];
     }
+    
     if (current.RoomId == 37  && current.InfoBox == "PSYCHOPATH DEFEATED BONUS!" && !vars.Splits.Contains("deetz"))
     {
         vars.Splits.Add("deetz");
         return settings["deetz"];
+    }
+
+    //Split on last hit on Sullivan
+    if (current.RoomId == 38  && current.BossHealth < 0 && !vars.Splits.Contains("sullivan"))
+    {
+        vars.Splits.Add("sullivan");
+        return settings["sullivan"];
     }
 
     //Escorting Survivors Splits
@@ -261,7 +271,7 @@ split
     }
 
 	// TK Split
-	if (current.TKHealth < 1 && old.TKHealth > 0 && current.RoomId == 44 &&!vars.Splits.Contains("tkDead"))
+	if (current.BossHealth < 1 && old.BossHealth > 0 && current.RoomId == 44 &&!vars.Splits.Contains("tkDead"))
 	{
 		vars.Splits.Add("tkDead");
 		return settings["tkDead"];
