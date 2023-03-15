@@ -227,7 +227,7 @@ split
     }
 
     //Escorting Survivors Splits
-    if (current.InfoBox == "ESCORT COMPLETE" && !vars.Splits.Contains("surv"))
+    if (current.InfoBox == "ESCORT COMPLETE" && old.InfoBox != "ESCORT COMPLETE")
     {
         return settings["surv"];
     }
