@@ -8,7 +8,7 @@ state("deadrising2")
     int KillCount: 0x09DE9A8, 0x0, 0x444;
     int PlayerLevel: 0x09CB124, 0x4, 0x98, 0x20;
     int PlayerCash: 0x09DE9A8, 0x8, 0x70;
-    byte PlayerControl: 0x97BDC0;
+    int CaseMenu: 0x009DE9A8, 0x0, 0xA4;
     float BossHealth: 0x09DC488, 0xE8, 0x12C, 0x28, 0x16C, 0x1AC;
     string255 InfoBox: 0x0A11604, 0x194, 0xFC, 0x58;
     int TIRTimer: 0x0097F2B8, 0x34, 0x1C, 0x3C8, 0x3F;
@@ -137,6 +137,10 @@ startup
                 settings.Add("$" + cash.ToString(), false, "$" + cash.ToString(), "money");
             }
 
+        //Improper Behaviour Splits
+        settings.Add("impbe", true, "Improper Behavior", "splits");
+                settings.Add("POSTER SPRAYED BONUS!", false, "Split after each Poster Sprayed", "impbe");
+
         //Splits that could come in handy
         settings.Add("misc", true, "Miscellaneous Splits", "splits");
             settings.Add("073_ending_e1", false, "Ending E", "misc");
@@ -167,16 +171,6 @@ init
 {
     vars.Splits = new HashSet<string>();
     vars.EarlHelper = 0;
-}
-
-start
-{
-	return (current.Cutscene == "003_chucks_entrance" && current.TIRTimer != 66 && old.TIRTimer == 66); //Starts on TIR Timer reaching 0 in Prologue
-}
-
-reset
-{
-	return (current.RoomId == 2 && old.RoomId == 32);
 }
 
 update
@@ -270,7 +264,7 @@ split
         }
     }
 
-    //Overtime Items
+    //Overtime Items and Improper Behaviour Splits
     if (current.InfoBox != old.InfoBox && !vars.Splits.Contains(current.InfoBox))
     {
         vars.Splits.Add(current.InfoBox);
@@ -288,6 +282,17 @@ split
 isLoading
 {
     return current.IsLoading;
+}
+
+start
+{
+	//Starts on TIR Timer reaching 0 in Prologue and Closing a Case Menu or when closing the Case Menu to start an IL run
+    return (current.TIRTimer != 66 && old.TIRTimer == 66 || current.CaseMenu == 0 && old.CaseMenu != 0);
+}
+
+reset
+{
+	return (current.RoomId == 2 && old.RoomId == 32);
 }
 
 onReset
