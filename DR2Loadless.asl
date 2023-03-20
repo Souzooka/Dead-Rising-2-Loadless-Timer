@@ -2,15 +2,17 @@
 //Autosplitter by Streetbackguy and Sweed
 state("deadrising2")
 {
-    bool IsLoading: 0x9DC3F0, 0x38, 0x1C8;
+    bool Loads: 0x9DC3F0, 0x38, 0x1C8;
     int RoomId: 0x00E1A8C, 0x0;
     string255 Cutscene: 0x09DC3F0, 0x38, 0xCC;
     int KillCount: 0x09DE9A8, 0x0, 0x444;
+    float PlayerHealth: 0x00A1162C, 0x2C8 , 0x2C, 0x64, 0x2C;
     int PlayerLevel: 0x09CB124, 0x4, 0x98, 0x20;
     int PlayerCash: 0x09DE9A8, 0x8, 0x70;
     int CaseMenu: 0x009DE9A8, 0x0, 0xA4;
     float BossHealth: 0x09DC488, 0xE8, 0x12C, 0x28, 0x16C, 0x1AC;
     string255 InfoBox: 0x0A11604, 0x194, 0xFC, 0x58;
+    int Timer: 0x009DD170, 0x284, 0xE4, 0x2B94;
     int TIRTimer: 0x0097F2B8, 0x34, 0x1C, 0x3C8, 0x3F;
 }
 
@@ -20,7 +22,7 @@ startup
 
         //Prologue
         settings.Add("prologue", true, "Prologue", "splits");
-            settings.Add("015_arrive_at_the_safehouse_2", false, "Death in Prologue", "prologue");
+            settings.Add("prologuedeath", false, "Death in Prologue", "prologue");
             settings.Add("013_exit_the_stadium", false, "Exit the Stadium", "prologue");
 
         //Katey's Zombrex
@@ -195,6 +197,13 @@ split
 		return settings[current.Cutscene];
 	}
 
+    // Prologue split
+	if (current.PlayerHealth < 1 && old.PlayerHealth != 0 && !vars.Splits.Contains("prologuedeath"))
+	{
+		vars.Splits.Add("prologuedeath");
+		return settings["prologuedeath"];
+	}
+
     //Snipers split (Splits after each Sniper is defeated)
     if (current.RoomId == 35 && current.InfoBox == "PSYCHOPATH DEFEATED BONUS!" && !vars.Splits.Contains("johnny"))
     {
@@ -281,13 +290,13 @@ split
 
 isLoading
 {
-    return current.IsLoading;
+    return current.Loads;
 }
 
 start
 {
-	//Starts on TIR Timer reaching 0 in Prologue and Closing a Case Menu or when closing the Case Menu to start an IL run
-    return (current.TIRTimer != 66 && old.TIRTimer == 66 || current.CaseMenu == 0 && old.CaseMenu != 0);
+	//Starts on TIR Timer reaching 0 in Prologue, Closing a Case Menu or when closing the Case Menu to start an IL run and starting in the Security Room on an NG+ run
+    return (current.TIRTimer != 66 && old.TIRTimer == 66 || current.CaseMenu == 0 && old.CaseMenu != 0 || !current.Loads && current.RoomId == 40 && current.Timer == 10800);
 }
 
 reset
